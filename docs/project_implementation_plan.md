@@ -1,17 +1,9 @@
 # Master Implementation Plan: Hardened Open-Source Log Processing Architecture (RHEL 9.6)
 
 ## Project Overview & Objectives
-This document is the definitive master implementation plan for **Subject 21: Mise en place d'une architecture de traitement des événements de sécurité (LOG)**.
+This document is the definitive master implementation plan for the project.
 
 The project implements and defends a fault-tolerant, open-source Security Information and Event Management (SIEM) pipeline on a hardened Red Hat Enterprise Linux 9.6 host using Docker Compose. The architecture ingests, normalizes, indexes, and visualizes security telemetry across four distinct layers (host authentication, kernel auditd, systemd-journald, and remote RFC 5424 syslog), protected by host-level defense-in-depth (SELinux, firewalld zone segmentation, CIS OpenSSH hardening, and kernel tuning).
-
-### Milestone Progression & Scorecard
-
-| Milestone | Scope | Status | Deliverables / Verification |
-| :--- | :--- | :---: | :--- |
-| **Séance 1** | Architectural Stack, Ingestion Engine, Storage, SOC Dashboard, Host Hardening | **100% COMPLETE** | OpenSearch 2.18 (GREEN, 0 replicas), Fluent Bit 3.1.9, Dashboards 2.18, 6-widget SOC Dashboard, exported `soc-dashboard.ndjson`, SELinux Enforcing, firewalld zones, CIS SSH, auditd rules. |
-| **Séance 2** | Offensive Validation & MITRE ATT&CK Testing | **100% COMPLETE** | Scenario 1: Hydra SSH brute force (T1110.001) verified.<br/>Scenario 2: Intruder privilege escalation (T1548.003) & FIM verified.<br/>Scenario 3: 50-event remote syslog burst (RFC 5424) verified. |
-| **Séance 3** | Academic Deliverables & Defense Preparation | **IN PROGRESS** | Academic Technical Mini-Report (`rapport_technique_siem.md`) & 5-minute timed oral defense slide script with jury Q&A. |
 
 ---
 
@@ -22,9 +14,9 @@ The project implements and defends a fault-tolerant, open-source Security Inform
        │  SSH :2222 -> :22 | Web UI :5601 -> :5601
        ▼
 [ VirtualBox NAT Network: 10.0.2.0/24 (Gateway: 10.0.2.1) ]
-       │                                     │
-       ├─────────────────────────┐           │
-       ▼                         ▼           ▼
+       │                                     
+       ├─────────────────────────┐           
+       ▼                         ▼           
 [ Target: RHEL 9.6 VM ]     [ Docker Bridge: 172.28.0.0/16 ]     [ Attacker: Kali VM ]
 IP: 10.0.2.10 (enp0s3)      ├── Fluent Bit (172.28.0.10)          IP: 10.0.2.3 (eth0)
 Default Zone: DROP          ├── OpenSearch (172.28.0.20)          Outbound: Hydra,
@@ -53,14 +45,9 @@ Firewall: siem-mgmt         └── Dashboards (172.28.0.30)          logger, 
 | **Log Ingestion Flexibility**| Ingests raw `/var/log/audit/audit.log`, systemd journal binary sockets, container stdout, and RFC 5424 syslog streams seamlessly. | Heavily biased toward the Wazuh Agent (`TCP/1514`). Native syslog ingestion requires legacy agentless forwarders or local analysisd decoding. | High ingestion flexibility via Logstash/Beats, but resource-heavy. |
 | **Lifecycle & Storage (ISM)**| Native OpenSearch **Index State Management (ISM)** policies automate rollover, hot/warm/cold tiers, and deletion via declarative JSON. | Retains raw archives only via flat files (`archives.json`) or index deletion policies in Filebeat. | Supported via Elasticsearch ILM, but restricted behind SSPL. |
 
-### 1.2 Defense Argumentation for Oral Jury
-1. **Decoupled Stream Pipeline Engineering**: Wazuh is an all-in-one appliance where data ingestion and decoding are handled by pre-compiled XML rules. Our project demonstrates end-to-end data engineering: schema normalization, regex tokenization, C-engine buffering, and index template enforcement.
-2. **Deterministic Resource Consumption**: Fluent Bit is written in C with zero runtime dependencies. It consumes $<40$ MB RAM and binds directly to the systemd C library (`sd-journal`), avoiding JVM bloat.
-3. **Pure Apache 2.0 Provenance**: Fulfills open-source academic criteria without SSPL license restrictions or commercial feature-gating.
-
 ---
 
-## 2. Séance 1: Architectural Implementation (Completed & Verified)
+## 2. Architectural Implementation
 
 ### 2.1 Ingestion & Processing Architecture
 
@@ -185,7 +172,7 @@ The dashboard has been expanded into a **6-Widget Full-Spectrum SOC Console**:
 
 ---
 
-## 4. Séance 2: Offensive Testing & Technical Validation (Completed & Verified)
+## 4. Offensive Testing & Technical Validation
 
 ### 4.1 Scenario 1: Automated SSH Brute Force (MITRE ATT&CK T1110.001)
 
@@ -259,53 +246,3 @@ The dashboard has been expanded into a **6-Widget Full-Spectrum SOC Console**:
 * **Structured RFC Metadata**: Extracted `ident` (`palo-alto-fw`, `suricata-ids`), `host` (`kali`), and indexed under `routing_tag: "remote.syslog"`.
 * **Telemetry Distribution**: `remote.syslog` appeared as a distinct slice in the **Telemetry by Layer** donut chart.
 
----
-
-## 5. Séance 3: Deliverables & Defense Preparation (Active Target)
-
-### 5.1 Deliverable 1: Academic Technical Mini-Report (`rapport_technique_siem.md`)
-
-The report is structured into 6 academic chapters:
-1. **Introduction & Cahier des Charges**: Context of Subject 21, objectives, threat modeling on Linux hosts.
-2. **Architecture & Benchmark Comparatif**: Mathematical and architectural comparison of OpenSearch + Fluent Bit vs Wazuh vs ELK (memory, licenses, transparency).
-3. **Ingénierie du Pipeline de Collecte & Normalisation**:
-   * Telemetry layers (auditd, secure, journald, remote syslog).
-   * Schema normalization (`modify` filter) and regex tokenization.
-   * Dual buffering (RAM + disk SQLite offset tracking).
-   * OpenSearch index template mapping (`src_ip` as IP, 0 replicas for GREEN status).
-4. **Durcissement de l'Hôte RHEL 9.6 (Defense-in-Depth)**:
-   * SELinux Enforcing mode and container context isolation.
-   * firewalld zone segmentation (`drop`, `siem-mgmt`, `siem-collector`) and the Docker nftables reload mitigation.
-   * CIS OpenSSH benchmark configuration.
-   * Linux kernel auditd privilege escalation and FIM rules.
-5. **Validation Expérimentale & Scénarios d'Attaque (MITRE ATT&CK)**:
-   * Scenario 1: Automated SSH brute force (T1110.001) with Hydra.
-   * Scenario 2: Privilege escalation & identity tampering (T1548.003 / T1078) with auditd forensic evidence (`auid` vs `uid`).
-   * Scenario 3: Remote syslog stream & stress test (50 events RFC 5424).
-6. **Interface SOC & Recommandations Industrielles**:
-   * Description of the 6 SOC dashboard widgets.
-   * Index State Management (ISM) retention lifecycle.
-   * Conclusion & lessons learned.
-
----
-
-### 5.2 Deliverable 2: 5-Minute Timed Oral Defense Script & Deck
-
-| Time Slot | Slide / Topic | Key Points to Articulate |
-| :--- | :--- | :--- |
-| **0:00 - 0:45** | **Slide 1: Problem & Stack Defense** | • Subject 21 context: Enterprise log processing.<br/>• Why OpenSearch + Fluent Bit over Wazuh: Decoupled pipeline engineering, $<40$ MB RAM footprint, pure Apache 2.0 license. |
-| **0:45 - 1:45** | **Slide 2: Host Hardening (Defense-in-Depth)** | • SELinux in Enforcing mode with container volume context.<br/>• firewalld zone segmentation: `siem-mgmt` (10.0.2.1) vs `siem-collector` (10.0.2.0/24), default `drop`.<br/>• The Docker/nftables chain reload caveat.<br/>• CIS OpenSSH & kernel auditd privilege escalation rules. |
-| **1:45 - 2:45** | **Slide 3: Stream Pipeline Engineering** | • Multi-source telemetry: auth, audit, journald, remote port 5140.<br/>• Schema normalization into unified `message`.<br/>• Typed parsing (`src_port:int`, `src_ip:ip`).<br/>• Fault-tolerant SQLite disk buffering. |
-| **2:45 - 4:00** | **Slide 4: Live Attack Demonstrations** | • Hydra SSH brute-force: Correlating 100+ separate sockets by `src_ip: 10.0.2.3`.<br/>• Privilege escalation: Catching `intruder` with immutable kernel `auid=1000`.<br/>• Remote syslog stress test: 50 events ingested with 0 loss. |
-| **4:00 - 5:00** | **Slide 5: SOC Dashboard, Storage Lifecycle & Conclusion** | • Live SOC dashboard walk-through (6 widgets).<br/>• Infrastructure-as-Code dashboard export (`soc-dashboard.ndjson`).<br/>• Cluster health **GREEN** with zero replicas.<br/>• Concluding takeaway on defense-in-depth. |
-
----
-
-### 5.3 Jury Q&A Anticipation & Defense Cheat Sheet
-
-| Likely Jury Question | Authoritative Technical Answer |
-| :--- | :--- |
-| **"Why didn't you use Wazuh since it's already an all-in-one SIEM?"** | *"Wazuh is an all-in-one HIDS appliance that hides the log engineering pipeline inside pre-compiled XML decoders. Subject 21 specifically requires designing and implementing a security log processing architecture. Our decoupled stack requires explicit pipeline engineering (buffering, schema normalization, typed parsing, index templating) while using one-third of the RAM ($<3$ GB vs $\ge 8$ GB for Wazuh)."* |
-| **"Why do you restart Docker after reloading firewalld?"** | *"On RHEL 9, running `firewall-cmd --reload` reloads firewalld's XML configurations and flushes active nftables filter tables. This inadvertently wipes Docker's internal `DOCKER` and `DOCKER-ISOLATION` routing chains. Restarting Docker forces the daemon to re-inject its container routing hooks into nftables cleanly."* |
-| **"In Scenario 2, how do you know user taher ran the command if the UID was intruder?"** | *"Linux kernel auditd tracks two distinct identities: `uid` (current process identity) and `auid` (Audit User ID / login UID). When a user logs in via SSH, the kernel permanently stamps their login session with `auid=1000`. Even if they execute `su - intruder` or `sudo su`, `auid` remains unchangeable. Our auditd rule captured `auid=1000`, providing immutable forensic attribution."* |
-| **"Why did single-node OpenSearch start in yellow status and how did you fix it?"** | *"OpenSearch defaults to allocating 1 replica shard per primary shard. In a single-node lab, the replica shard cannot be assigned to another node, leaving cluster health in yellow status. We deployed an explicit index template (`security_logs_template`) enforcing `"number_of_replicas": 0`, which immediately transitioned cluster health to GREEN."* |

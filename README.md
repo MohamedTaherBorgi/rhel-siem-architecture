@@ -1,4 +1,4 @@
-# Hardened Open-Source SIEM Architecture (Subject 21)
+# Hardened Open-Source SIEM Architecture
 
 ![RHEL 9.6](https://img.shields.io/badge/OS-RHEL%209.6%20Minimal-red?logo=redhat)
 ![OpenSearch](https://img.shields.io/badge/Storage-OpenSearch%202.18.0-blue?logo=opensearch)
@@ -131,16 +131,16 @@ curl -X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=fa
 The dashboard provides a unified security command center across 6 synchronized widgets:
 
 ```
-┌───────────────────────────────────┬───────────────────────────────────┐
-│     Top Attacker IPs (Donut)      │   Top Targeted Accounts (Bar)     │
-│   10.0.2.3 (Kali) vs 10.0.2.1     │      admin, root, devops...       │
-├─────────────────┬─────────────────┼───────────────────────────────────┤
-│ SSH Attack Ctr  │ PrivEsc Violat. │    Telemetry by Layer (Donut)     │
-│  Metric: 134    │    Metric: 80   │ host.auth, host.audit, remote...  │
-├─────────────────┴─────────────────┴───────────────────────────────────┤
-│            Unified Live Security Incident Stream (Table)              │
+┌───────────────────────────────────┬─────────────────────────────────────┐
+│     Top Attacker IPs (Donut)      │   Top Targeted Accounts (Bar)       │
+│   10.0.2.3 (Kali) vs 10.0.2.1     │      admin, root, devops...         │
+├─────────────────┬─────────────────┼─────────────────────────────────────┤
+│ SSH Attack Ctr  │ PrivEsc Violat. │    Telemetry by Layer (Donut)       │
+│  Metric: 134    │    Metric: 80   │ host.auth, host.audit, remote...    │
+├─────────────────┴─────────────────┴─────────────────────────────────────┤
+│            Unified Live Security Incident Stream (Table)                │
 │ Time | message | target_user | routing_tag | src_ip | actor | audit_key │
-└───────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -173,17 +173,12 @@ The dashboard provides a unified security command center across 6 synchronized w
 │   ├── 01-cis-hardening.conf          # OpenSSH CIS benchmark configuration
 │   ├── 99-privesc.rules               # Linux kernel auditd rules
 │   └── setup-firewall.sh              # Automated firewalld zone script
-└── docs/                              # Academic & Technical Deliverables
-    ├── technical-report.md            # Comprehensive academic technical report
-    ├── presentation-defense.md        # 5-minute timed oral defense script & Q&A
-    └── architecture-plan.md           # Master architecture implementation plan
+└── docs/                              # Technical Deliverables
+    ├── complete_code_reference.md
+    └── project_implementation_plan.md
 ```
 
 ---
 
-## Academic Information
-
-* **Subject**: Subject 21 — Mise en place d'une architecture de traitement des événements de sécurité (LOG)
-* **Class**: CII-5-J-SSIRF-H
 * **Author**: BORGI Mohamed Taher
 * **License**: Apache License 2.0
