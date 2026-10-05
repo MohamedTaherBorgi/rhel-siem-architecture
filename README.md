@@ -11,6 +11,8 @@ An enterprise-grade, fault-tolerant log processing and security analytics archit
 
 The pipeline ingests, normalizes, indexes, and visualizes security telemetry across four distinct sources (host authentication, kernel `auditd`, binary `systemd-journald`, and remote RFC 5424 syslog), protected by host-level defense-in-depth (**SELinux Enforcing**, **firewalld** zone segmentation, **CIS OpenSSH**, and kernel **auditd** privilege escalation rules).
 
+<img width="1917" height="862" alt="Screenshot 2026-10-05 191903" src="https://github.com/user-attachments/assets/b9de2877-b9dd-410b-bf70-c4bb990e83e4" />
+
 ---
 
 ## Architecture Overview
