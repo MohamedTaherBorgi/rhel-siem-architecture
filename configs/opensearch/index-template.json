@@ -1,0 +1,41 @@
+{
+  "index_patterns": ["logs-security-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.refresh_interval": "1s"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "routing_tag": { "type": "keyword" },
+        "lab_node": { "type": "keyword" },
+        "pipeline": { "type": "keyword" },
+        "message": { "type": "text" },
+        "src_ip": { "type": "ip" },
+        "src_port": { "type": "integer" },
+        "target_user": { "type": "keyword" },
+        "actor": { "type": "keyword" },
+        "command": {
+          "type": "text",
+          "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } }
+        },
+        "pwd": { "type": "keyword" },
+        "tty": { "type": "keyword" },
+        "audit_type": { "type": "keyword" },
+        "audit_id": { "type": "keyword" },
+        "audit_epoch": { "type": "double" },
+        "audit_key": { "type": "keyword" },
+        "syscall": { "type": "integer" },
+        "success": { "type": "keyword" },
+        "exit_code": { "type": "integer" },
+        "exe": { "type": "keyword" },
+        "auid": { "type": "integer" },
+        "uid": { "type": "integer" },
+        "euid": { "type": "integer" }
+      }
+    }
+  },
+  "priority": 100
+}

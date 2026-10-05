@@ -1,0 +1,17 @@
+# Ignore live Lucene index data and Fluent Bit disk buffers
+storage/opensearch-data/*
+!storage/opensearch-data/.gitkeep
+storage/fluent-bit-buffer/*
+!storage/fluent-bit-buffer/.gitkeep
+# Ignore database locks, SQLite files, and runtime logs
+*.db
+*.db-journal
+*.log
+# Ignore IDE and OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Ignore temporary credential test wordlists
+users.txt
+passwords.txt

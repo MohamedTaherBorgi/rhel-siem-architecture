@@ -1,0 +1,70 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    container_name: siem-opensearch
+    environment:
+      - cluster.name=siem-cluster
+      - node.name=siem-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./storage/opensearch-data:/usr/share/opensearch/data:z
+    networks:
+      siem-internal:
+        ipv4_address: 172.28.0.20
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.18.0
+    container_name: siem-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://172.28.0.20:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
+    networks:
+      siem-internal:
+        ipv4_address: 172.28.0.30
+    depends_on:
+      - opensearch
+    restart: unless-stopped
+
+  fluent-bit:
+    image: fluent/fluent-bit:3.1.9
+    container_name: siem-fluent-bit
+    user: "0:0"
+    security_opt:
+      - label=disable
+    volumes:
+      - ./configs/fluent-bit:/fluent-bit/etc:ro,z
+      - /var/log:/var/log:ro
+      - /run/log/journal:/run/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./storage/fluent-bit-buffer:/fluentbit-buffer:z
+    ports:
+      - "5140:5140/tcp"
+      - "5140:5140/udp"
+    networks:
+      siem-internal:
+        ipv4_address: 172.28.0.10
+    depends_on:
+      - opensearch
+    restart: unless-stopped
+
+networks:
+  siem-internal:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

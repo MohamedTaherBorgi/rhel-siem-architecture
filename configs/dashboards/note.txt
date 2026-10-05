@@ -1,0 +1,5 @@
+You can import it programmatically with a single command without even opening the browser:
+
+curl -X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=false" \
+  -H "osd-xsrf: true" \
+  --form file=@~/siem-stack/configs/dashboards/soc-dashboard.ndjson

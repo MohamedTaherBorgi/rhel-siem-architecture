@@ -1,0 +1,16 @@
+## Delete all previous rules
+-D
+## Set kernel audit buffer size
+-b 8192
+## Failure mode: printk (log to kernel ring buffer on audit failure)
+-f 1
+## Monitor execution of privilege escalation binaries (MITRE T1548)
+-a always,exit -F arch=b64 -S execve -F euid=0 -F auid>=1000 -F auid!=4294967295 -k priv_esc_exec
+-a always,exit -F arch=b32 -S execve -F euid=0 -F auid>=1000 -F auid!=4294967295 -k priv_esc_exec
+## Monitor sudoers file modifications (MITRE T1548.003)
+-w /etc/sudoers -p wa -k sudoers_modification
+-w /etc/sudoers.d/ -p wa -k sudoers_modification
+## Monitor identity database tampering (MITRE T1078)
+-w /etc/passwd -p wa -k user_db_modification
+-w /etc/shadow -p wa -k shadow_modification
+-w /etc/group -p wa -k group_db_modification
