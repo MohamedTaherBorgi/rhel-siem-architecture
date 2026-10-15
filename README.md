@@ -5,7 +5,6 @@
 ![Fluent Bit](https://img.shields.io/badge/Collector-Fluent%20Bit%203.1.9-green?logo=fluentbit)
 ![Docker Compose](https://img.shields.io/badge/Runtime-Docker%20Compose-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)
-![Status](https://img.shields.io/badge/Cluster%20Health-GREEN-brightgreen)
 
 An enterprise-grade, fault-tolerant log processing and security analytics architecture built on a hardened **Red Hat Enterprise Linux 9.6** platform using **Docker Compose**. 
 
