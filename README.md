@@ -6,6 +6,10 @@
 ![Docker Compose](https://img.shields.io/badge/Runtime-Docker%20Compose-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)
 
+> Project documentation files are located at the repository root:
+> - `complete_code_reference.md` — complete deployment guide and technical reference
+> - `project_implementation_plan.md` — master implementation plan and architecture roadmap
+
 An enterprise-grade, fault-tolerant log processing and security analytics architecture built on a hardened **Red Hat Enterprise Linux 9.6** platform using **Docker Compose**. 
 
 The pipeline ingests, normalizes, indexes, and visualizes security telemetry across four distinct sources (host authentication, kernel `auditd`, binary `systemd-journald`, and remote RFC 5424 syslog) into a single-node **OpenSearch 2.18** cluster with a live incident dashboard.
