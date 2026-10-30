@@ -8,7 +8,7 @@
 
 An enterprise-grade, fault-tolerant log processing and security analytics architecture built on a hardened **Red Hat Enterprise Linux 9.6** platform using **Docker Compose**. 
 
-The pipeline ingests, normalizes, indexes, and visualizes security telemetry across four distinct sources (host authentication, kernel `auditd`, binary `systemd-journald`, and remote RFC 5424 syslog), protected by host-level defense-in-depth (**SELinux Enforcing**, **firewalld** zone segmentation, **CIS OpenSSH**, and kernel **auditd** privilege escalation rules).
+The pipeline ingests, normalizes, indexes, and visualizes security telemetry across four distinct sources (host authentication, kernel `auditd`, binary `systemd-journald`, and remote RFC 5424 syslog) into a single-node **OpenSearch 2.18** cluster with a live incident dashboard.
 
 <img width="1917" height="862" alt="Screenshot 2026-10-05 191903" src="https://github.com/user-attachments/assets/b9de2877-b9dd-410b-bf70-c4bb990e83e4" />
 
@@ -65,7 +65,7 @@ flowchart TD
 3. **Pristine Cluster Health (GREEN)**: Custom index template enforces `"number_of_replicas": 0` and maps `src_ip` as a native `ip` type for mathematical CIDR filtering.
 4. **Host Defense-in-Depth**:
    * **SELinux in Enforcing Mode**: Scoped container access (`security_opt: [ "label=disable" ]`) permits Fluent Bit to read `/var/log/audit/audit.log` without disabling global host MAC.
-   * **firewalld Segmentation**: Default `drop` zone; SSH and Dashboards isolated to `siem-mgmt` (`10.0.2.1/32`); Syslog isolated to `siem-collector` (`10.0.2.0/24`). Includes mitigation for the Docker nftables chain reload flush.
+   * **firewalld Segmentation**: Default `drop` zone; SSH and Dashboards isolated to `siem-mgmt` (`10.0.2.1/32`); Syslog isolated to `siem-collector` (`10.0.2.0/24`). Includes mitigation for the DDoS/port scanning and remote log tampering paths.
    * **CIS OpenSSH Hardening**: Modular drop-in enforcing `MaxSessions 10` (CIS 5.2.19), `PermitRootLogin no`, and modern elliptic-curve crypto (`curve25519-sha256`, `chacha20-poly1305`).
    * **Linux Kernel auditd**: Intercepts `execve` syscalls (`euid=0`, `auid>=1000`) with immutable forensic caller attribution (`AUID="taher"` vs `UID="intruder"`).
 5. **Infrastructure-as-Code (IaC)**: Complete 6-widget SOC dashboard exported as `configs/dashboards/soc-dashboard.ndjson` for 1-click restoration.
@@ -160,6 +160,8 @@ The dashboard provides a unified security command center across 6 synchronized w
 .
 ├── .gitignore                         # Prevents database binary and buffer commits
 ├── README.md                          # Open-source showcase & setup documentation
+├── complete_code_reference.md         # Technical reference and deployment guide
+├── project_implementation_plan.md     # Master implementation plan
 ├── docker-compose.yml                 # Multi-container orchestration specification
 ├── configs/
 │   ├── fluent-bit/
@@ -174,9 +176,10 @@ The dashboard provides a unified security command center across 6 synchronized w
 │   ├── 01-cis-hardening.conf          # OpenSSH CIS benchmark configuration
 │   ├── 99-privesc.rules               # Linux kernel auditd rules
 │   └── setup-firewall.sh              # Automated firewalld zone script
-└── docs/                              # Technical Deliverables
-    ├── complete_code_reference.md
-    └── project_implementation_plan.md
+├── storage/                           # OpenSearch and buffer persistence
+│   ├── opensearch-data/
+│   └── fluent-bit-buffer/
+└── .gitignore
 ```
 
 ---
